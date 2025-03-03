@@ -1,0 +1,14 @@
+PyQt5==5.15.10
+numpy==1.26.4
+Pillow>=10.0.0
+pytest==7.4.3
+pytest-qt==4.2.0
+pytest-cov==4.1.0
+black==23.12.1
+isort==5.13.2
+pytesseract==0.3.10
+transformers==4.37.2
+torch>=2.0.0
+uuid>=1.30
+datasets>=2.15.0
+sentencepiece>=0.1.99 
