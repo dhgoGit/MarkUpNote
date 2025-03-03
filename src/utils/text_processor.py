@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import torch
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+import os
 
 class TextProcessor:
     """텍스트 처리기 클래스
@@ -24,11 +25,40 @@ class TextProcessor:
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f"사용 장치: {self.device}")
         
+        # 1. 환경 변수 설정
+        os.environ['TRANSFORMERS_CACHE'] = os.path.join(os.path.expanduser("~"), ".cache", "huggingface")
+        
+        try:
+            # 2. ASCII 문자만 포함된 토큰 확인
+            with open("util/access_token/token", "r", encoding='utf-8') as f:
+                auth_token = f.read().strip()
+                # ASCII 문자만 허용
+                auth_token = ''.join(c for c in auth_token if ord(c) < 128)
+        except FileNotFoundError:
+            print("토큰 파일을 찾을 수 없습니다.")
+            auth_token = None
+            
+        try:
+            # 3. 모델 로드 시도
+            self.processor = TrOCRProcessor.from_pretrained(
+                "microsoft/trocr-base-handwritten",
+                use_auth_token=auth_token,  # token 대신 use_auth_token 사용
+                trust_remote_code=True
+            )
+        except Exception as e:
+            print(f"모델 로드 실패: {str(e)}")
+            # 4. 오프라인 모드로 재시도
+            try:
+                self.processor = TrOCRProcessor.from_pretrained(
+                    "microsoft/trocr-base-handwritten",
+                    local_files_only=True
+                )
+            except Exception as offline_e:
+                print(f"오프라인 로드도 실패: {str(offline_e)}")
+                raise
+        
         # 모델과 프로세서 로드
         model_name = "microsoft/trocr-base-handwritten"
-        auth_token = open("util/access_token/token", "r").read()  ## util/access_token/token 파일에 저장된 토큰을 가져옴
-            
-        self.processor = TrOCRProcessor.from_pretrained(model_name, token=auth_token)
         self.model = VisionEncoderDecoderModel.from_pretrained(model_name, token=auth_token)
         
         # 모델을 해당 장치로 이동
