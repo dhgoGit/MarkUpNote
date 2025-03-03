@@ -20,7 +20,7 @@ class TextProcessor:
     def __init__(self):
         """텍스트 처리기 초기화"""
         print("텍스트 처리기 초기화 시작...")
-        
+    
         # GPU 사용 가능 여부 확인
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print(f"사용 장치: {self.device}")
@@ -59,7 +59,7 @@ class TextProcessor:
         
         # 모델과 프로세서 로드
         model_name = "microsoft/trocr-base-handwritten"
-        self.model = VisionEncoderDecoderModel.from_pretrained(model_name, token=auth_token)
+        self.model = VisionEncoderDecoderModel.from_pretrained(model_name, use_auth_token=auth_token)
         
         # 모델을 해당 장치로 이동
         self.model.to(self.device)
